@@ -142,7 +142,10 @@ export function matchMove(phrase, chess) {
     if (candidates.length > 1) {
       // ambiguous; prefer non-pawn if piece specified
       return candidates[0];
-    }
+  if (candidates.length > 1) {
+  // Return all candidates so caller can ask user to disambiguate
+  return { ambiguous: true, candidates };
+  }
   }
 
   // 4. SAN-like cleanups (e.g., "Nf3" without explicit destination prefix)

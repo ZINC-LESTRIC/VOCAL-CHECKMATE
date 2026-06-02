@@ -243,6 +243,11 @@ export default function PlayAI() {
           {clock.enabled && (
             <Clock seconds={bottomSeconds} active={bottomActive && !game.ended} label={bottomLabel} />
           )}
+          {userTurn && (
+  <div className="text-xs text-zinc-500 text-center max-w-xs font-mono">
+    💡 Say: <span className="text-zinc-300">"N F 3"</span> · <span className="text-zinc-300">"E 4"</span> · <span className="text-zinc-300">"O O"</span> (castle)
+  </div>
+)}
           <VoiceMic
             chessRef={game.chessRef}
             onMove={(m) => onUserMove({ from: m.from, to: m.to, promotion: m.promotion })}

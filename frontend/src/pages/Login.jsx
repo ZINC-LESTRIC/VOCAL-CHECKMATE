@@ -51,6 +51,9 @@ export default function Login() {
           {busy ? "Signing in…" : "Sign in"}
         </button>
         <p className="text-center text-sm text-zinc-400">
+          <Link to="/forgot-password" className="text-[#FCD34D]">Forgot password?</Link>
+        </p>
+        <p className="text-center text-sm text-zinc-400">
           New here? <Link to="/register" className="text-[#FCD34D]">Create an account</Link>
         </p>
       </form>

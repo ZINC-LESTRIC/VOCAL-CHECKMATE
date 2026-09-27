@@ -52,14 +52,12 @@ export default function GameReview() {
     [game],
   );
 
-  // Init analyzer once
   useEffect(() => {
     const a = new StockfishAnalyzer();
     analyzerRef.current = a;
     return () => a.destroy();
   }, []);
 
-  // Re-evaluate whenever index changes
   useEffect(() => {
     const a = analyzerRef.current;
     if (!a || !fens[index]) return;
@@ -73,7 +71,6 @@ export default function GameReview() {
     return () => { cancelled = true; };
   }, [index, fens]);
 
-  // Keyboard nav
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "ArrowLeft") setIndex((i) => Math.max(0, i - 1));
@@ -98,21 +95,33 @@ export default function GameReview() {
     pairs.push({ n: i / 2 + 1, w: sans[i], b: sans[i + 1], wi: i + 1, bi: i + 2 });
   }
 
+  const modeLabel =
+    game.mode === "ai"
+      ? `vs Engine · Level ${game.engine_level || "?"}`
+      : game.mode === "online"
+      ? "Online game"
+      : "Local game";
+
+  const timeLabel = game.time_control ? game.time_control : "Unlimited";
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
       <button onClick={() => navigate(-1)} className="text-sm text-zinc-400 hover:text-white inline-flex items-center gap-1 mb-4">
         <ArrowLeft size={14} /> Back
       </button>
 
-      <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
+      {/* Header with clear time control */}
+      <div className="flex flex-wrap items-end justify-between gap-3 mb-6">
         <div>
           <div className="text-xs uppercase tracking-[0.3em] text-[#FCD34D]">Game review</div>
-          <h1 className="font-display text-4xl">
-            {game.mode === "ai" ? `vs Engine L${game.engine_level || "?"}` : game.mode === "online" ? "Online" : "Local"}
-            {game.time_control ? ` · ${game.time_control}` : ""}
-          </h1>
-          <div className="text-zinc-500 font-mono text-xs mt-1">
-            {game.result ? `${game.result} · ${game.termination || "—"}` : "ongoing"}
+          <h1 className="font-display text-4xl">{modeLabel}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-3 text-sm">
+            <span className="font-mono text-[#FCD34D] bg-[#FCD34D]/10 px-2 py-0.5 rounded">
+              Time: {timeLabel}
+            </span>
+            <span className="text-zinc-400 font-mono text-xs">
+              {game.result ? `${game.result} · ${game.termination || "—"}` : "ongoing"}
+            </span>
           </div>
         </div>
         <div className="text-xs font-mono text-zinc-400" data-testid="review-position-index">
@@ -121,12 +130,9 @@ export default function GameReview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-1 order-1 flex items-stretch">
-          <EvalBar cp={evalScore.cp} mate={evalScore.mate} orientation={orientation} />
-        </div>
-
-        <div className="lg:col-span-7 order-2 flex flex-col gap-4 items-center">
-          <div className="w-full max-w-[80vh]">
+        {/* Board + horizontal eval bar underneath */}
+        <div className="lg:col-span-8 flex flex-col gap-3 items-center">
+          <div className="w-full max-w-[min(80vh,100%)]">
             <BoardView
               fen={fens[index]}
               onMove={() => false}
@@ -134,7 +140,18 @@ export default function GameReview() {
               disabled
             />
           </div>
-          <div className="flex items-center gap-2 flex-wrap justify-center">
+
+          {/* Horizontal evaluation bar under the board */}
+          <div className="w-full max-w-[min(80vh,100%)]">
+            <EvalBar
+              cp={evalScore.cp}
+              mate={evalScore.mate}
+              orientation={orientation}
+              horizontal
+            />
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap justify-center mt-1">
             <button data-testid={REVIEW.first} onClick={() => setIndex(0)} className="btn-ghost !py-2 !px-4"><CaretDoubleLeft size={16} /></button>
             <button data-testid={REVIEW.prev} onClick={() => setIndex((i) => Math.max(0, i - 1))} className="btn-ghost !py-2 !px-4"><CaretLeft size={16} /></button>
             <button data-testid={REVIEW.next} onClick={() => setIndex((i) => Math.min(fens.length - 1, i + 1))} className="btn-ghost !py-2 !px-4"><CaretRight size={16} /></button>
@@ -145,7 +162,8 @@ export default function GameReview() {
           </div>
         </div>
 
-        <div className="lg:col-span-4 order-3 glass rounded-2xl p-4 max-h-[80vh] overflow-y-auto">
+        {/* PGN / moves list */}
+        <div className="lg:col-span-4 glass rounded-2xl p-4 max-h-[80vh] overflow-y-auto">
           <div className="text-xs uppercase tracking-[0.3em] text-zinc-400 mb-3">PGN</div>
           <div data-testid={REVIEW.pgn} className="font-mono text-sm">
             {pairs.length === 0 && <div className="text-zinc-500 italic">No moves recorded.</div>}

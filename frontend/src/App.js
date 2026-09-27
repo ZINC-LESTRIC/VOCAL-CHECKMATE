@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import Dashboard from "@/pages/Dashboard";
 import PlayAI from "@/pages/PlayAI";
 import PlayLocal from "@/pages/PlayLocal";
@@ -37,6 +39,8 @@ function Shell() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
         <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
+        <Route path="/forgot-password" element={<PublicOnly><ForgotPassword /></PublicOnly>} />
+        <Route path="/reset-password" element={<PublicOnly><ResetPassword /></PublicOnly>} />
         <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
         <Route path="/play/ai" element={<Protected><PlayAI /></Protected>} />
         <Route path="/play/local" element={<Protected><PlayLocal /></Protected>} />

@@ -1,12 +1,13 @@
 /**
- * Vertical evaluation bar.
+ * Evaluation bar.
  *
  * Props:
  *  - cp: centipawns from white's perspective (positive = white advantage)
  *  - mate: mate-in-N from white's perspective (overrides cp)
  *  - orientation: which side is at the bottom of the board ("white" | "black")
+ *  - horizontal: if true, render as a horizontal bar under the board
  */
-export default function EvalBar({ cp, mate, orientation = "white" }) {
+export default function EvalBar({ cp, mate, orientation = "white", horizontal = false }) {
   let whitePct = 50;
   let label = "0.0";
 
@@ -14,9 +15,7 @@ export default function EvalBar({ cp, mate, orientation = "white" }) {
     whitePct = mate > 0 ? 100 : 0;
     label = `M${Math.abs(mate)}`;
   } else if (cp != null) {
-    // squash with a smooth function, clamp to [-1000, 1000]
     const clamped = Math.max(-1000, Math.min(1000, cp));
-    // map cp to advantage in pawns then to %
     const pawns = clamped / 100;
     const adv = 1 / (1 + Math.exp(-pawns / 2.5));
     whitePct = adv * 100;
@@ -25,14 +24,51 @@ export default function EvalBar({ cp, mate, orientation = "white" }) {
     label = "…";
   }
 
-  const whiteSide = orientation === "white" ? "bottom" : "top";
   const isMate = mate != null;
+
+  if (horizontal) {
+    // Horizontal bar: white advantage grows from left to right (or right if black at bottom)
+    const whiteFromLeft = orientation === "white";
+    const fillPct = whiteFromLeft ? whitePct : 100 - whitePct;
+
+    return (
+      <div
+        data-testid="eval-bar"
+        className="relative w-full h-5 rounded-md overflow-hidden border border-white/10 bg-zinc-900"
+      >
+        <div
+          className="absolute top-0 bottom-0 transition-all duration-300"
+          style={{
+            left: whiteFromLeft ? 0 : undefined,
+            right: whiteFromLeft ? undefined : 0,
+            width: `${fillPct}%`,
+            background: isMate
+              ? (mate > 0 ? "#FCD34D" : "#1f1f1f")
+              : "linear-gradient(90deg, #f1efe7 0%, #e9e3cf 100%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 flex items-center justify-center text-[11px] font-mono font-bold tracking-wider pointer-events-none"
+          style={{
+            color: whitePct > 50 ? "#000" : "#fff",
+            textShadow: whitePct > 50 ? "0 1px 0 rgba(255,255,255,0.3)" : "0 1px 2px rgba(0,0,0,0.6)",
+          }}
+          data-testid="eval-bar-label"
+        >
+          {label}
+        </div>
+      </div>
+    );
+  }
+
+  // Vertical bar (original)
+  const whiteSide = orientation === "white" ? "bottom" : "top";
 
   return (
     <div
       data-testid="eval-bar"
       className="relative h-full w-6 rounded-md overflow-hidden border border-white/10 bg-zinc-900"
-      style={{ minHeight: "80vh" }}
+      style={{ minHeight: "60vh" }}
     >
       <div
         className="absolute left-0 right-0 transition-all duration-300"

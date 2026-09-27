@@ -18,6 +18,15 @@ class LoginIn(BaseModel):
     password: str
 
 
+class ForgotPasswordIn(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordIn(BaseModel):
+    token: str
+    new_password: str = Field(min_length=6, max_length=128)
+
+
 class UpdateProfileIn(BaseModel):
     username: Optional[str] = Field(default=None, min_length=3, max_length=24)
     name: Optional[str] = Field(default=None, max_length=80)
@@ -58,4 +67,3 @@ class AdminUpdateIn(BaseModel):
 
 class FriendRequestIn(BaseModel):
     username: str = Field(min_length=3, max_length=24)
-

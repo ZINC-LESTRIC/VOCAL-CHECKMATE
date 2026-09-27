@@ -32,7 +32,7 @@ class UpdateProfileIn(BaseModel):
     name: Optional[str] = Field(default=None, max_length=80)
     bio: Optional[str] = Field(default=None, max_length=400)
     country: Optional[str] = Field(default=None, max_length=60)
-    avatar: Optional[str] = Field(default=None, max_length=200000)  # data URL allowed
+    avatar: Optional[str] = Field(default=None, max_length=3000000)  # allow larger base64 avatars
     board_theme: Optional[str] = Field(default=None, max_length=40)
     piece_set: Optional[str] = Field(default=None, max_length=40)
     sound_enabled: Optional[bool] = None

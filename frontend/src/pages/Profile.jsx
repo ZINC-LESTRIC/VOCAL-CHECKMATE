@@ -5,6 +5,37 @@ import { api, formatApiErrorDetail } from "@/lib/api";
 import { PROFILE } from "@/constants/testIds";
 import { Camera } from "@phosphor-icons/react";
 
+function resizeImage(file, maxSize = 400) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxSize) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          }
+        } else if (height > maxSize) {
+          width = Math.round((width * maxSize) / height);
+          height = maxSize;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function Profile() {
   const { user, setUser } = useAuth();
   const [form, setForm] = useState({ username: "", name: "", bio: "", country: "", avatar: "" });
@@ -22,16 +53,19 @@ export default function Profile() {
     });
   }, [user]);
 
-  const onAvatar = (e) => {
+  const onAvatar = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 1500000) {
-      toast.error("Image too large (max 1.5MB).");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image too large (max 5MB).");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, avatar: reader.result }));
-    reader.readAsDataURL(file);
+    try {
+      const dataUrl = await resizeImage(file, 400);
+      setForm((f) => ({ ...f, avatar: dataUrl }));
+    } catch {
+      toast.error("Could not process image");
+    }
   };
 
   const save = async (e) => {
